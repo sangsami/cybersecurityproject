@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import tristate, reactions, like_score, plural with context %}
+
+{% block header %}
+  <h1>{{ movie['title'] }}</h1>
+{% endblock %}
+
+{% block content %}
+
+  {% if movie_genres %}
+    <p class="genres">Genres: {{ movie_genres | map(attribute='name') | join(', ') }}</p>
+  {% endif %}
+
+  <div class="stats">
+    <span><strong>{{ plural(stats.total, 'review') }}</strong></span>
+    <span><strong>{{ stats.liked }}</strong> liked</span>
+    <span><strong>{{ stats.unliked }}</strong> not liked</span>
+    <span><strong>{{ stats.no_answer }}</strong> no answer</span>
+    <span><strong>{{ stats.recommended }}</strong> recommend</span>
+  </div>
+
+  <p class="score">
+    <strong>{{ like_score(stats.liked, stats.unliked) }}</strong>
+    {%- if stats.liked + stats.unliked %}, counting only people who answered.{% endif %}
+  </p>
+
+  <div class="actions">
+    {% if own_review %}
+      <a href="{{ url_for('update', review_id=own_review['id']) }}">Edit your review</a>
+    {% else %}
+      <a href="{{ url_for('create_review', movie_id=movie['id']) }}">Write a review</a>
+    {% endif %}
+  </div>
+
+  <h2>Reviews</h2>
+
+  {% for review in reviews %}
+    <article class="card">
+
+      <p>by
+        <a href="{{ url_for('profile', user_id=review['author_id']) }}">{{ review['username'] }}</a>
+      </p>
+
+      <div class="meta">
+        {{ tristate('Liked', review.liked) }}
+        {{ tristate('Recommend', review.recommend) }}
+      </div>
+
+      <p class="review-body">{{ review['body'] }}</p>
+
+      <div class="actions">
+        {{ reactions(review, reactions_map, current_user_id) }}
+      </div>
+
+    </article>
+  {% else %}
+    <p>No reviews for this movie yet.</p>
+  {% endfor %}
+
+  {% if total_pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="{{ url_for('movie', movie_id=movie['id'], page=page-1) }}">&laquo; Previous</a>
+      {% endif %}
+      <span>Page {{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}
+        <a href="{{ url_for('movie', movie_id=movie['id'], page=page+1) }}">Next &raquo;</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% endblock %}

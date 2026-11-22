@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>Add Movie</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" value="{{ title or '' }}" maxlength="200" required>
+
+    <fieldset>
+      <legend>Genres (optional)</legend>
+      {% for genre in all_genres %}
+        <label><input type="checkbox" name="genres" value="{{ genre['id'] }}"> {{ genre['name'] }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+    <button type="submit">Add Movie</button>
+  </form>
+{% endblock %}

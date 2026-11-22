@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>New Review</h1>
+{% endblock %}
+
+{% block content %}
+
+<form method="get" action="{{ url_for('create') }}">
+  <label for="q">Search for a movie</label>
+  <input
+    type="text"
+    name="q"
+    id="q"
+    value="{{ q }}"
+    maxlength="200"
+    placeholder="e.g. Inception"
+    required
+  >
+  <button type="submit">Search</button>
+</form>
+
+{% if q %}
+  {% if movies %}
+    <ul class="movie-list">
+      {% for movie in movies %}
+        <li>
+          <a href="{{ url_for('create_review', movie_id=movie['id']) }}">{{ movie['title'] }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No movies found for "{{ q }}".</p>
+  {% endif %}
+{% endif %}
+
+{% endblock %}
