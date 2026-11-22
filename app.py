@@ -44,6 +44,33 @@ def verify_password(stored_hash, password):
     # return check_password_hash(stored_hash, password)
 
 
+# FIX FLAW 4:
+# MAX_FAILED_LOGINS = 5
+# LOCKOUT_SECONDS = 300
+# failed_logins = {}
+#
+#
+# def is_locked_out(username):
+#     """Check if user is locked."""
+#     import time
+#     entry = failed_logins.get(username)
+#     return entry is not None and entry["locked_until"] > time.time()
+#
+#
+# def record_failed_login(username):
+#     """Record failed logins, lock the username when the limit is reached."""
+#     import time
+#     entry = failed_logins.setdefault(username, {"count": 0, "locked_until": 0})
+#     entry["count"] += 1
+#     if entry["count"] >= MAX_FAILED_LOGINS:
+#         entry["count"] = 0
+#         entry["locked_until"] = time.time() + LOCKOUT_SECONDS
+#
+#
+# def reset_failed_logins(username):
+#     """Reset failed logins count."""
+#     failed_logins.pop(username, None)
+
 
 def check_csrf():
     """Check for CSRF token, throw 403 if not found or mismatch."""
@@ -155,12 +182,21 @@ def login():
         password = request.form["password"]
         error = None
 
+        # FIX FLAW 4:
+        # if is_locked_out(username):
+        #     flash("Too many failed login attempts. Try again in a few minutes.", "error")
+        #     return render_template("auth/login.html"), 429
+
         user = users.get_user_by_username(username=username)
 
         if user is None or not verify_password(user["password_hash"], password):
             error = "Incorrect username or password."
+            # FIX FLAW 4:
+            # record_failed_login(username)
 
         if error is None:
+            # FIX FLAW 4:
+            # reset_failed_logins(username)
             session.clear()
             session["user_id"] = user["id"]
             session["csrf_token"] = secrets.token_hex(16)
