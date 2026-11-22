@@ -25,6 +25,9 @@ os.makedirs(app.instance_path, exist_ok=True)
 
 db.init_app(app)
 
+# FIX FLAW 5:
+# app.logger.setLevel("INFO")
+
 
 def hash_password(password):
     """Turn a plaintext password into the value stored in the database."""
@@ -194,9 +197,17 @@ def login():
             # FIX FLAW 4:
             # record_failed_login(username)
 
+            # FIX FLAW 5:
+            # app.logger.warning(
+            #     "LOGIN_FAILED username=%r ip=%s", username, request.remote_addr
+            # )
+
         if error is None:
             # FIX FLAW 4:
             # reset_failed_logins(username)
+
+            # FIX FLAW 5:
+            # app.logger.info("LOGIN_OK username=%r ip=%s", username, request.remote_addr)
             session.clear()
             session["user_id"] = user["id"]
             session["csrf_token"] = secrets.token_hex(16)
