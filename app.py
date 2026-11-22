@@ -8,7 +8,6 @@ import sqlite3
 
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.exceptions import HTTPException, abort
-from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
 import movies
@@ -25,6 +24,25 @@ app.config.from_pyfile("config.py", silent=True)
 os.makedirs(app.instance_path, exist_ok=True)
 
 db.init_app(app)
+
+
+def hash_password(password):
+    """Turn a plaintext password into the value stored in the database."""
+    import hashlib
+    return hashlib.md5(password.encode("utf-8")).hexdigest()
+    # FIX FLAW 2:
+    # from werkzeug.security import generate_password_hash
+    # return generate_password_hash(password)
+
+
+def verify_password(stored_hash, password):
+    """Check a plaintext password against the stored hash."""
+    import hashlib
+    return stored_hash == hashlib.md5(password.encode("utf-8")).hexdigest()
+    # FIX FLAW 2:
+    # from werkzeug.security import check_password_hash
+    # return check_password_hash(stored_hash, password)
+
 
 
 def check_csrf():
@@ -115,7 +133,7 @@ def register():
 
         if not errors:
             try:
-                users.create_user(username, generate_password_hash(password1))
+                users.create_user(username, hash_password(password1))
             except sqlite3.IntegrityError:
                 errors.append(f"User {username} is already registered.")
             else:
@@ -139,7 +157,7 @@ def login():
 
         user = users.get_user_by_username(username=username)
 
-        if user is None or not check_password_hash(user["password_hash"], password):
+        if user is None or not verify_password(user["password_hash"], password):
             error = "Incorrect username or password."
 
         if error is None:
