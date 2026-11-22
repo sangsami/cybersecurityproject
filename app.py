@@ -329,7 +329,9 @@ def create_review(movie_id):
 @login_required
 def update(review_id):
     """Update review. Login required."""
-    review = movies.get_review(review_id=review_id, user_id=g.user["id"])
+    review = movies.get_review_any_author(review_id=review_id)
+    # FIX FLAW 1:
+    # review = movies.get_review(review_id=review_id, user_id=g.user["id"])
 
     if review is None:
         abort(404, "Review not found or you don't have permission.")

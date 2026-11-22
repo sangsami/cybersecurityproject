@@ -163,6 +163,19 @@ def get_review(review_id, user_id):
     )
 
 
+def get_review_any_author(review_id):
+    """Get review by review ID only."""
+    return db.query_one(
+        """
+        SELECT r.id, r.body, r.movie_id, r.liked, r.recommend, m.title
+        FROM reviews r
+        JOIN movies m ON r.movie_id = m.id
+        WHERE r.id = ?
+        """,
+        (review_id,),
+    )
+
+
 def update_review(review_id, body, liked, recommend):
     """UPDATE review."""
     db.execute(
