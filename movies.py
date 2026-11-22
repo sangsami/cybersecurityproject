@@ -194,7 +194,9 @@ def delete_review(review_id, user_id):
 
 def search_movies(q):
     """Search movie titles that contain given parameter."""
-    return db.query("SELECT id, title FROM movies WHERE title LIKE ? LIMIT 10", (f"%{q}%",))
+    return db.query(f"SELECT id, title FROM movies WHERE title LIKE '%{q}%' LIMIT 10")
+    # FIX FLAW 3:
+    # return db.query("SELECT id, title FROM movies WHERE title LIKE ? LIMIT 10", (f"%{q}%",))
 
 
 def validate_genre_ids(genre_ids):
